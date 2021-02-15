@@ -7,6 +7,7 @@
         <recommend-view :recommends = 'recommends'/>
         <feature-view/>
         <tab-control class='tab-con' :titles = "['流行','新款','精选']"/>
+        <goods-list :goods = "goods['pop'].list"/>
 
         <ul>
           <li>1</li>
@@ -67,9 +68,13 @@
  import FeatureView from './childComps/FeatureView'
 
  import NavBar from '../../components/common/navbar/Navbar';
- import TabControl from '../../components/content/tabControl/TabControl.vue'
+ import TabControl from '../../components/content/tabControl/TabControl'
+ import GoodsList from '../../components/content/goods/GoodsList'
 
- import {getHomeData} from '../../network/home';
+ import {
+   getHomeData,
+   getHomeGoods
+  } from '../../network/home';
 
 export default {
   name:'Home',
@@ -78,7 +83,8 @@ export default {
     HomeSwiper,
     RecommendView,
     FeatureView,
-    TabControl
+    TabControl,
+    GoodsList,
   },
   data() {
     return {
@@ -86,17 +92,35 @@ export default {
       recommends:[],
       goods:{
         'pop':{page:0,list:[]},
-        'news':{page:0,list:[]},
+        'new':{page:0,list:[]},
         'sell':{page:0,list:[]},
       }
 
     }
   },
   created() {
-    getHomeData().then(res=>{
-      this.banners = res.data.data.banner.list;
-      this.recommends = res.data.data.recommend.list;
-    })
+    this.handleGetHomeData();
+    
+    this.handleGetHomeGoods('pop');
+    this.handleGetHomeGoods('new');
+    this.handleGetHomeGoods('sell');
+  },
+  methods: {
+    handleGetHomeData() {
+      getHomeData().then(res=>{
+        this.banners = res.data.data.banner.list;
+        this.recommends = res.data.data.recommend.list;
+      })
+    },
+
+    handleGetHomeGoods(type) {
+      let page = this.goods[type].page + 1;
+      getHomeGoods(type,page).then(res=>{
+        this.goods[type].list.push(...res.data.data.list);
+        this.goods[type].page += 1;
+      })
+    }
+    
   },
   
 }
