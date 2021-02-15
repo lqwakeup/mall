@@ -29,5 +29,10 @@ export default {
 </script>
 
 <style scoped>
-
+    .goods{
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        text-align: center;
+    }
 </style>

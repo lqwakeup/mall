@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="goods-item">
         <img :src="goodsItem.show.img" alt="">
         <div>
             <p>{{goodsItem.title}}</p>
@@ -30,5 +30,12 @@ export default {
 </script>
 
 <style scoped>
+    .goods-item{
+       width: 50%; 
+    }
 
+    .goods-item img{
+        width: 100%;
+        padding: 10px 10px;
+    }
 </style>

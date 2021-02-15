@@ -3,62 +3,18 @@
         <nav-bar class="nav">
           <div slot="center">购物街</div>
         </nav-bar>
-        <home-swiper :banners='banners'/>
-        <recommend-view :recommends = 'recommends'/>
-        <feature-view/>
-        <tab-control class='tab-con' :titles = "['流行','新款','精选']"/>
-        <goods-list :goods = "goods['pop'].list"/>
 
-        <ul>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-          <li>1</li>
-        </ul>
+        <scroll class="content" ref="scroll" :probe-type='3' @scroll="contentScroll">
+          <home-swiper :banners='banners'/>
+          <recommend-view :recommends = 'recommends'/>
+          <feature-view/>
+          <tab-control class='tab-con' 
+                      :titles = "['流行','新款','精选']"
+                      @tabclick="tabclick"/>
+          <goods-list :goods = "showGoods"/>
+        </scroll>
+
+        <back-top @click.native="backTop" v-show="isShow"/>
     </div>
 </template>
 
@@ -68,8 +24,10 @@
  import FeatureView from './childComps/FeatureView'
 
  import NavBar from '../../components/common/navbar/Navbar';
+ import Scroll from '../../components/common/scroll/Scroll';
  import TabControl from '../../components/content/tabControl/TabControl'
  import GoodsList from '../../components/content/goods/GoodsList'
+ import BackTop from '../../components/content/backTop/BackTop'
 
  import {
    getHomeData,
@@ -85,6 +43,8 @@ export default {
     FeatureView,
     TabControl,
     GoodsList,
+    Scroll,
+    BackTop
   },
   data() {
     return {
@@ -94,8 +54,14 @@ export default {
         'pop':{page:0,list:[]},
         'new':{page:0,list:[]},
         'sell':{page:0,list:[]},
-      }
-
+      },
+      currentType:'pop',
+      isShow:false
+    }
+  },
+  computed:{
+    showGoods() {
+      return this.goods[this.currentType].list;
     }
   },
   created() {
@@ -106,6 +72,33 @@ export default {
     this.handleGetHomeGoods('sell');
   },
   methods: {
+    /**
+     * 事件监听
+     */
+    tabclick(index) {
+      switch(index) {
+        case 0:
+          this.currentType = 'pop';
+          break;
+        case 1:
+          this.currentType = 'new';
+          break;
+        case 2:
+          this.currentType = 'sell';
+          break;
+      }
+    },
+
+    backTop() {
+      this.$refs.scroll.scroll.scrollTo(0,0,500);
+    },
+
+    contentScroll(position) {
+      this.isShow = -position.y>1000?true:false;
+    },
+    /**
+     * 网络请求
+     */
     handleGetHomeData() {
       getHomeData().then(res=>{
         this.banners = res.data.data.banner.list;
@@ -119,7 +112,8 @@ export default {
         this.goods[type].list.push(...res.data.data.list);
         this.goods[type].page += 1;
       })
-    }
+    },
+    
     
   },
   
@@ -129,6 +123,8 @@ export default {
 <style scoped>
   #home{
     padding-top: 44px;
+    height: 100vh;
+    position: relative;
   }
 
   .nav{
@@ -145,5 +141,14 @@ export default {
   #home .tab-control{
     position: sticky;
     top: 44px;
+  }
+
+  .content{
+    position: absolute;
+    top: 44px;
+    bottom: 49px;
+    left: 0;
+    right: 0;
+    /* background-color: red; */
   }
 </style>
